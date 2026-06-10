@@ -1,0 +1,13 @@
+services:
+  carryonlife-wc2026:
+    build: .
+    container_name: carryonlife-wc2026
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3001}:3000"
+    volumes:
+      # Persist state.json across container restarts
+      - ./data:/app/data
+    environment:
+      - PORT=3000
+      - FOOTBALL_API_KEY=${FOOTBALL_API_KEY:-}
