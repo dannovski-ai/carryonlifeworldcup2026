@@ -823,6 +823,13 @@ function ukTime(time, venue) {
 // Debounce map for prediction sends
 const predDebounce = {};
 
+let predictView = 'date'; // 'date' | 'group'
+
+function setPredictView(v) {
+  predictView = v;
+  renderPredict();
+}
+
 function renderPredict() {
   const el = document.getElementById('predictContent');
   if (!currentPlayer) {
@@ -834,12 +841,19 @@ function renderPredict() {
   const st = playerStats(p);
   const resultsIn = Object.keys(S.results).length;
 
+  const viewToggle = `
+    <div style="display:inline-flex;border:1px solid var(--border-hi);border-radius:6px;overflow:hidden;margin-top:12px">
+      <button onclick="setPredictView('date')" style="padding:6px 14px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .15s;background:${predictView==='date'?'var(--accent)':'transparent'};color:${predictView==='date'?'#fff':'var(--muted)'}">By date</button>
+      <button onclick="setPredictView('group')" style="padding:6px 14px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .15s;background:${predictView==='group'?'var(--accent)':'transparent'};color:${predictView==='group'?'#fff':'var(--muted)'}">By group</button>
+    </div>`;
+
   let html = `
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:16px">
       <div>
         <div class="section-label">Nº 02 / Your predictions</div>
         <h2 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:900">${p}'s <em style="font-style:italic;color:var(--accent)">picks</em></h2>
         <div style="font-size:12px;color:var(--muted);margin-top:4px">Predictions auto-save · ${resultsIn} result${resultsIn!==1?'s':''} in so far</div>
+        ${viewToggle}
       </div>
       <div style="display:flex;gap:20px;flex-wrap:wrap">
         ${[['Points','pts-correct',st.points],['Correct','',st.correct],['Exact ⭐','pts-exact',st.exact],['Predicted','',Object.values(preds).filter(v=>v.h!==undefined&&v.a!==undefined).length]].map(([lbl,cls,val])=>`
@@ -850,15 +864,29 @@ function renderPredict() {
       </div>
     </div>`;
 
-  const groups = {};
-  ALL_MATCHES.forEach(m => {
-    const key = m.stage === 'group' ? m.date : m.stage;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(m);
-  });
+  // Build sections based on selected view
+  const sections = {}; // key → [matches]
+  const sectionOrder = [];
+
+  if (predictView === 'group') {
+    // Group stage: by group letter (A–L); knockout: by stage name
+    ALL_MATCHES.forEach(m => {
+      const key = m.stage === 'group' ? ('Group ' + m.group) : m.stage;
+      if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
+      sections[key].push(m);
+    });
+  } else {
+    // Date order: group stage by date, knockout by stage name
+    ALL_MATCHES.forEach(m => {
+      const key = m.stage === 'group' ? m.date : m.stage;
+      if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
+      sections[key].push(m);
+    });
+  }
 
   let n = 1;
-  for (const [key, matches] of Object.entries(groups)) {
+  for (const key of sectionOrder) {
+    const matches = sections[key];
     html += `<div class="md-div"><span>${key}</span></div>`;
     matches.forEach(m => {
       const pred = preds[m.id];
