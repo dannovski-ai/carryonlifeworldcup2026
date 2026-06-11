@@ -466,6 +466,20 @@
   </div>
 </div>
 
+<div class="modal-overlay hidden" id="adminModal">
+  <div class="modal">
+    <h3>⚙ <em>Manage Players</em></h3>
+    <div style="margin:16px 0;max-height:240px;overflow-y:auto" id="adminPlayerList"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input type="text" id="adminAddName" placeholder="Add player by name…" maxlength="30" style="flex:1">
+      <button class="btn-primary" onclick="adminAddPlayerFromModal()" style="white-space:nowrap">Add</button>
+    </div>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn-cancel" onclick="closeAdminModal()">Done</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-brand">endpoint<strong>X</strong> · World Cup 2026 Prediction League</div>
   <div class="footer-actions">
@@ -620,6 +634,8 @@ function setCurrentPlayer(name) {
   sessionStorage.setItem('wc2026_player', name);
 }
 
+const isAdmin = () => (currentPlayer || '').trim().toLowerCase() === 'dan stead';
+
 function syncUI() {
   document.getElementById('chipName').textContent = currentPlayer || 'Select player';
   document.getElementById('playerCount').textContent = S.players.length;
@@ -689,10 +705,12 @@ function togglePlayerDropdown() {
   const hidden = dd.classList.toggle('hidden');
   if (!hidden) {
     dd.innerHTML = S.players.map(p => `
-      <div class="pd-item${p===currentPlayer?' active':''}" onclick="selectPlayer(${JSON.stringify(p)})">
-        ${p===currentPlayer?'✓ ':''}${p}
+      <div class="pd-item${p===currentPlayer?' active':''}" style="display:flex;align-items:center;gap:6px">
+        <span style="flex:1;cursor:pointer" onclick="selectPlayer(${JSON.stringify(p)})">${p===currentPlayer?'✓ ':''}${p}</span>
+        ${isAdmin() ? `<span onclick="adminDeletePlayer(${JSON.stringify(p)})" style="color:var(--orange);cursor:pointer;font-size:12px;padding:2px 6px;opacity:0.7" title="Remove player">✕</span>` : ''}
       </div>`).join('') +
-      `<div class="pd-item add" onclick="openModal()">+ Add player</div>`;
+      `<div class="pd-item add" onclick="openModal()">+ Add player</div>` +
+      (isAdmin() ? `<div class="pd-item" style="color:var(--orange);font-size:12px;border-top:1px solid var(--border);margin-top:4px;padding-top:8px" onclick="openAdminModal()">⚙ Manage players</div>` : '');
   }
 }
 function selectPlayer(name) {
@@ -719,6 +737,39 @@ function confirmAddPlayer() {
   setCurrentPlayer(name);
   closeModal();
   showPanel('predict', document.querySelectorAll('.tab')[1]);
+}
+
+function adminDeletePlayer(target) {
+  document.getElementById('playerDropdown').classList.add('hidden');
+  if (!confirm(`Remove "${target}" and all their predictions?`)) return;
+  socket.emit('admin_delete_player', { requester: currentPlayer, target });
+}
+
+function openAdminModal() {
+  document.getElementById('playerDropdown').classList.add('hidden');
+  renderAdminModal();
+  document.getElementById('adminModal').classList.remove('hidden');
+}
+function closeAdminModal() {
+  document.getElementById('adminModal').classList.add('hidden');
+}
+function renderAdminModal() {
+  const list = document.getElementById('adminPlayerList');
+  list.innerHTML = S.players.length === 0
+    ? '<p style="color:var(--muted);font-size:13px">No players yet.</p>'
+    : S.players.map(p => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:14px">${p}</span>
+        <button onclick="adminDeletePlayer(${JSON.stringify(p)});renderAdminModal()" style="background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:11px;padding:3px 10px;cursor:pointer;border-radius:3px">Remove</button>
+      </div>`).join('');
+}
+function adminAddPlayerFromModal() {
+  const inp = document.getElementById('adminAddName');
+  const name = inp.value.trim();
+  if (!name) return;
+  socket.emit('add_player', name);
+  inp.value = '';
+  setTimeout(renderAdminModal, 200);
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !document.getElementById('addPlayerModal').classList.contains('hidden')) confirmAddPlayer();
@@ -1190,7 +1241,9 @@ function renderSweepstake() {
         <p>${S.players.length} player${S.players.length!==1?'s':''} in the league · 48 teams · ${S.players.length>0?teamsPerPlayer:3} teams per player drawn at random.<br>Once drawn, teams are locked — eliminations tracked as the tournament progresses.</p>
         ${S.players.length === 0
           ? `<p style="color:var(--orange);font-size:13px">Add players via the player selector first.</p>`
-          : `<button class="btn-primary" onclick="drawSweepstake()" style="font-size:15px;padding:14px 36px">🎟️ Draw now</button>`
+          : isAdmin()
+            ? `<button class="btn-primary" onclick="drawSweepstake()" style="font-size:15px;padding:14px 36px">🎟️ Draw now</button>`
+            : `<p style="color:var(--muted);font-size:13px">Waiting for the admin to run the draw…</p>`
         }
       </div>`;
     return;
@@ -1214,7 +1267,7 @@ function renderSweepstake() {
         <div class="section-label">Nº 08 / Sweepstake</div>
         <h2 style="font-family:'Playfair Display',serif;font-size:34px;font-weight:900">Fortune favours the <em style="font-style:italic;color:var(--accent)">bold</em>.</h2>
       </div>
-      <button onclick="resetSweepstake()" style="padding:8px 16px;border:1px solid var(--border-hi);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-end" onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--muted)'">↺ Re-draw</button>
+      ${isAdmin() ? `<button onclick="resetSweepstake()" style="padding:8px 16px;border:1px solid var(--border-hi);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-end" onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--muted)'">↺ Re-draw</button>` : ''}
     </div>`;
 
   // Winner banner
@@ -1270,7 +1323,8 @@ function renderSweepstake() {
   });
   html += `</div>`;
 
-  // ── Elimination panel ─────────────────────────────────────────────────────
+  // ── Elimination panel (admin only) ────────────────────────────────────────
+  if (!isAdmin()) { el.innerHTML = html; return; }
   html += `
     <div style="margin-top:40px">
       <div class="section-label" style="margin-bottom:12px">Mark teams as eliminated</div>
@@ -1295,11 +1349,11 @@ function renderSweepstake() {
 }
 
 function drawSweepstake() {
-  socket.emit('draw_sweepstake');
+  socket.emit('draw_sweepstake', { requester: currentPlayer });
 }
 function resetSweepstake() {
   if (!confirm('Re-draw the sweepstake? This will reassign all teams.')) return;
-  socket.emit('reset_sweepstake');
+  socket.emit('reset_sweepstake', { requester: currentPlayer });
 }
 function toggleEliminated(team) {
   socket.emit('toggle_eliminated', { team });

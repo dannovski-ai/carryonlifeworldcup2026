@@ -209,6 +209,10 @@ async function fetchScores() {
   }
 }
 
+// ── Admin ─────────────────────────────────────────────────────────────────────
+const ADMIN_NAME = 'dan stead';
+const isAdmin = name => typeof name === 'string' && name.trim().toLowerCase() === ADMIN_NAME;
+
 // ── Socket.io handlers ────────────────────────────────────────────────────────
 io.on('connection', socket => {
   console.log(`+ client ${socket.id}`);
@@ -225,6 +229,19 @@ io.on('connection', socket => {
     }
     persistState();
     io.emit('state_update', state);
+  });
+
+  socket.on('admin_delete_player', ({ requester, target }) => {
+    if (!isAdmin(requester)) return;
+    target = (typeof target === 'string') ? target.trim() : '';
+    if (!target) return;
+    state.players = state.players.filter(p => p !== target);
+    delete state.predictions[target];
+    // Remove from sweepstake assignments
+    if (state.sweepstake.assignments) delete state.sweepstake.assignments[target];
+    persistState();
+    io.emit('state_update', state);
+    console.log(`Admin deleted player: ${target}`);
   });
 
   socket.on('save_prediction', ({ player, matchId, side, value }) => {
@@ -255,7 +272,8 @@ io.on('connection', socket => {
   });
 
   // ── Sweepstake ──────────────────────────────────────────────────────────────
-  socket.on('draw_sweepstake', () => {
+  socket.on('draw_sweepstake', ({ requester } = {}) => {
+    if (!isAdmin(requester)) return;
     if (state.players.length === 0) return;
     const teams = shuffle(ALL_TEAMS);
     const assignments = {};
@@ -274,7 +292,8 @@ io.on('connection', socket => {
     console.log(`Sweepstake drawn — ${state.players.length} players, ${totalToAssign} teams assigned`);
   });
 
-  socket.on('reset_sweepstake', () => {
+  socket.on('reset_sweepstake', ({ requester } = {}) => {
+    if (!isAdmin(requester)) return;
     state.sweepstake = { drawn: false, assignments: {}, eliminated: [] };
     persistState();
     io.emit('state_update', state);
@@ -309,6 +328,15 @@ app.get('/health', (_, res) => res.json({
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 loadState();
+
+// Set RESET_STATE=true on Railway to wipe players/predictions/sweepstake on next deploy
+if (process.env.RESET_STATE === 'true') {
+  console.log('⚠️  RESET_STATE=true — clearing all players, predictions and sweepstake');
+  state.players     = [];
+  state.predictions = {};
+  state.sweepstake  = { drawn: false, assignments: {}, eliminated: [] };
+  persistState();
+}
 
 if (API_KEY) {
   console.log('🔑 FOOTBALL_API_KEY set — live & final scores will auto-update');
