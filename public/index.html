@@ -626,12 +626,12 @@ KO_STAGES.forEach(s => s.matches.forEach(m => {
 // SERVER STATE  (populated via Socket.io)
 // ═══════════════════════════════════════════════════════════════
 let S = { players:[], predictions:{}, results:{}, live:{} };
-// currentPlayer is per-browser (sessionStorage)
-let currentPlayer = sessionStorage.getItem('wc2026_player') || null;
+// currentPlayer persists across refreshes and tabs via localStorage
+let currentPlayer = localStorage.getItem('wc2026_player') || null;
 
 function setCurrentPlayer(name) {
   currentPlayer = name;
-  sessionStorage.setItem('wc2026_player', name);
+  localStorage.setItem('wc2026_player', name);
 }
 
 const isAdmin = () => (currentPlayer || '').trim().toLowerCase() === 'dan stead';
@@ -720,6 +720,7 @@ function selectPlayer(name) {
   const active = document.querySelector('.panel.active')?.id;
   if (active === 'panel-predict')     renderPredict();
   if (active === 'panel-leaderboard') renderLeaderboard();
+  if (active === 'panel-sweepstake')  renderSweepstake();
 }
 function openModal() {
   document.getElementById('playerDropdown').classList.add('hidden');
@@ -1249,8 +1250,12 @@ function renderSweepstake() {
     return;
   }
 
-  // ── Determine winner ──────────────────────────────────────────────────────
-  const playersWithSurvivors = S.players.filter(p => {
+  // ── Split drawn vs late-joining players ──────────────────────────────────
+  const drawnPlayers = S.players.filter(p => sw.assignments[p] && sw.assignments[p].length > 0);
+  const lateJoiners  = S.players.filter(p => !sw.assignments[p] || sw.assignments[p].length === 0);
+
+  // ── Determine winner (only from drawn players) ────────────────────────────
+  const playersWithSurvivors = drawnPlayers.filter(p => {
     const teams = sw.assignments[p] || [];
     return teams.some(t => !eliminated.has(t));
   });
@@ -1261,13 +1266,17 @@ function renderSweepstake() {
   const totalTeams = Object.values(sw.assignments).flat().length;
   const elimCount = [...eliminated].filter(t => Object.values(sw.assignments).flat().includes(t)).length;
 
+  const redrawBtn = isAdmin()
+    ? '<button onclick="resetSweepstake()" style="padding:8px 16px;border:1px solid var(--border-hi);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-end" onmouseover="this.style.borderColor=\'var(--orange)\';this.style.color=\'var(--orange)\'" onmouseout="this.style.borderColor=\'var(--border-hi)\';this.style.color=\'var(--muted)\'">↺ Re-draw</button>'
+    : '';
+
   let html = `
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px">
       <div>
         <div class="section-label">Nº 08 / Sweepstake</div>
         <h2 style="font-family:'Playfair Display',serif;font-size:34px;font-weight:900">Fortune favours the <em style="font-style:italic;color:var(--accent)">bold</em>.</h2>
       </div>
-      ${isAdmin() ? `<button onclick="resetSweepstake()" style="padding:8px 16px;border:1px solid var(--border-hi);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;align-self:flex-end" onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--muted)'">↺ Re-draw</button>` : ''}
+      ${redrawBtn}
     </div>`;
 
   // Winner banner
@@ -1285,7 +1294,7 @@ function renderSweepstake() {
 
   html += `
     <div class="sw-status-bar">
-      <div class="sw-status-item"><strong>${S.players.length}</strong> players</div>
+      <div class="sw-status-item"><strong>${drawnPlayers.length}</strong> players in draw</div>
       <div class="sw-status-item"><strong>${totalTeams}</strong> teams assigned</div>
       <div class="sw-status-item"><strong>${elimCount}</strong> eliminated</div>
       <div class="sw-status-item"><strong>${totalTeams - elimCount}</strong> surviving</div>
@@ -1293,8 +1302,9 @@ function renderSweepstake() {
     </div>`;
 
   // ── Player cards ──────────────────────────────────────────────────────────
+
   // Sort: most survivors first, winner at top
-  const sortedPlayers = [...S.players].sort((a, b) => {
+  const sortedPlayers = [...drawnPlayers].sort((a, b) => {
     const aAlive = (sw.assignments[a]||[]).filter(t => !eliminated.has(t)).length;
     const bAlive = (sw.assignments[b]||[]).filter(t => !eliminated.has(t)).length;
     return bAlive - aAlive;
@@ -1322,6 +1332,13 @@ function renderSweepstake() {
       </div>`;
   });
   html += `</div>`;
+
+  // Late joiners note
+  if (lateJoiners.length > 0) {
+    html += `<p style="font-size:13px;color:var(--muted);margin-top:16px">
+      ⚠ ${lateJoiners.join(', ')} joined after the draw and ${lateJoiners.length===1?'has':'have'} no teams assigned.
+    </p>`;
+  }
 
   // ── Elimination panel (admin only) ────────────────────────────────────────
   if (!isAdmin()) { el.innerHTML = html; return; }
