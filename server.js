@@ -83,6 +83,7 @@ const NAME_MAP = {
   'Democratic Republic of the Congo':  'DR Congo',
   'Curacao':                           'Curaçao',
   'United States':                     'USA',
+  'Cape Verde Islands':                'Cape Verde',
 };
 const norm = n => NAME_MAP[n] || n;
 
