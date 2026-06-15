@@ -869,18 +869,26 @@ function renderPredict() {
   const sectionOrder = [];
 
   if (predictView === 'group') {
-    // Group stage: by group letter (A–L); knockout: by stage name
+    // Group stage by letter (A–L); knockout by stage name
     ALL_MATCHES.forEach(m => {
       const key = m.stage === 'group' ? ('Group ' + m.group) : m.stage;
       if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
       sections[key].push(m);
     });
   } else {
-    // Date order: group stage by date, knockout by stage name
+    // All fixtures by date — group and knockout together under the same date heading
     ALL_MATCHES.forEach(m => {
-      const key = m.stage === 'group' ? m.date : m.stage;
+      const key = m.date || m.stage; // fallback to stage name if no date
       if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
       sections[key].push(m);
+    });
+    // Sort date keys chronologically (ISO date strings sort lexicographically)
+    sectionOrder.sort((a, b) => {
+      const da = new Date(a), db = new Date(b);
+      if (!isNaN(da) && !isNaN(db)) return da - db;
+      if (!isNaN(da)) return -1;
+      if (!isNaN(db)) return 1;
+      return 0; // both non-dates (stage names) — keep order
     });
   }
 
