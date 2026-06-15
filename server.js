@@ -169,8 +169,15 @@ async function fetchScores() {
     for (const match of (data.matches || [])) {
       const home = norm(match.homeTeam?.name || '');
       const away = norm(match.awayTeam?.name || '');
-      // Try both home|away and away|home since API home/away can differ from our fixture list
-      const id = FIXTURE_LOOKUP[`${home}|${away}`] || FIXTURE_LOOKUP[`${away}|${home}`];
+
+      // Try direct lookup first; if not found try reversed.
+      // Track reversal so we can swap scores to match OUR home/away ordering.
+      let id = FIXTURE_LOOKUP[`${home}|${away}`];
+      let reversed = false;
+      if (!id) {
+        id = FIXTURE_LOOKUP[`${away}|${home}`];
+        if (id) reversed = true;
+      }
       if (!id) {
         console.log(`⚠ No fixture match for: ${home} vs ${away}`);
         continue;
@@ -179,22 +186,31 @@ async function fetchScores() {
       const ft  = match.score?.fullTime;
       const ht  = match.score?.halfTime;
 
-      if (match.status === 'FINISHED' && ft?.home != null && ft?.away != null) {
+      // If reversed, the API home/away are swapped relative to our fixture list.
+      // Swap scores so h = our home team's goals, a = our away team's goals.
+      const ftH = reversed ? ft?.away  : ft?.home;
+      const ftA = reversed ? ft?.home  : ft?.away;
+      const htH = reversed ? ht?.away  : ht?.home;
+      const htA = reversed ? ht?.home  : ht?.away;
+
+      if (match.status === 'FINISHED' && ftH != null && ftA != null) {
         const prev = state.results[id];
-        if (!prev || prev.h !== ft.home || prev.a !== ft.away) {
-          state.results[id] = { h: ft.home, a: ft.away };
+        if (!prev || prev.h !== ftH || prev.a !== ftA) {
+          state.results[id] = { h: ftH, a: ftA };
           delete state.live[id];
           changed = true;
-          console.log(`✓ FT  ${home} ${ft.home}–${ft.away} ${away}`);
+          const label = reversed ? `${away} ${ftH}–${ftA} ${home}` : `${home} ${ftH}–${ftA} ${away}`;
+          console.log(`✓ FT  ${label}${reversed ? ' [reversed]' : ''}`);
         }
       } else if (['IN_PLAY', 'PAUSED', 'HALF_TIME'].includes(match.status)) {
-        const cur = match.status === 'HALF_TIME' ? ht : ft;
-        if (cur?.home != null && cur?.away != null) {
+        const curH = match.status === 'HALF_TIME' ? htH : (reversed ? ft?.away : ft?.home);
+        const curA = match.status === 'HALF_TIME' ? htA : (reversed ? ft?.home : ft?.away);
+        if (curH != null && curA != null) {
           const prev = state.live[id];
-          if (!prev || prev.h !== cur.home || prev.a !== cur.away || prev.status !== match.status) {
-            newLive[id] = { h: cur.home, a: cur.away, status: match.status };
+          if (!prev || prev.h !== curH || prev.a !== curA || prev.status !== match.status) {
+            newLive[id] = { h: curH, a: curA, status: match.status };
             changed = true;
-            console.log(`⚽ LIVE ${home} ${cur.home}–${cur.away} ${away} [${match.status}]`);
+            console.log(`⚽ LIVE ${home} ${curH}–${curA} ${away} [${match.status}]${reversed ? ' [reversed]' : ''}`);
           } else {
             newLive[id] = prev; // keep unchanged
           }
