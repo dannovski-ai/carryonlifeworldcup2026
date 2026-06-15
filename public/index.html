@@ -1042,6 +1042,36 @@ function selectGroup(g, btn) {
 function renderGroupContent(g) {
   const data = GROUPS[g];
   const el = document.getElementById('groupContent');
+
+  // ── Compute standings from results ──────────────────────────────────────────
+  const stats = {};
+  data.teams.forEach(t => {
+    stats[t.name] = { name:t.name, flag:t.flag, P:0, W:0, D:0, L:0, GF:0, GA:0, GD:0, Pts:0 };
+  });
+
+  data.fixtures.forEach((f, i) => {
+    const id = `${g}_${i}`;
+    const res = S.results[id];
+    if (!res) return;
+    const h = stats[f.home], a = stats[f.away];
+    if (!h || !a) return;
+    h.P++; a.P++;
+    h.GF += res.h; h.GA += res.a;
+    a.GF += res.a; a.GA += res.h;
+    h.GD = h.GF - h.GA; a.GD = a.GF - a.GA;
+    if (res.h > res.a)      { h.W++; h.Pts+=3; a.L++; }
+    else if (res.h < res.a) { a.W++; a.Pts+=3; h.L++; }
+    else                    { h.D++; h.Pts++; a.D++; a.Pts++; }
+  });
+
+  const sorted = Object.values(stats).sort((a,b) =>
+    b.Pts!==a.Pts ? b.Pts-a.Pts :
+    b.GD!==a.GD   ? b.GD-a.GD   :
+    b.GF!==a.GF   ? b.GF-a.GF   : 0
+  );
+
+  const qClass = i => i<2 ? 'qq' : i===2 ? 'qp' : '';
+
   const standings = `
     <table class="standings">
       <thead><tr>
@@ -1050,12 +1080,12 @@ function renderGroupContent(g) {
         <th style="text-align:center">GF</th><th style="text-align:center">GA</th><th style="text-align:center">GD</th><th style="text-align:center">Pts</th>
       </tr></thead>
       <tbody>
-        ${data.teams.map((t,i) => `<tr>
-          <td class="qi ${i<2?'qq':i===2?'qp':''}"></td>
+        ${sorted.map((t,i) => `<tr>
+          <td class="qi ${qClass(i)}"></td>
           <td><span class="pos-n">${i+1}</span></td>
           <td><span style="font-size:15px;margin-right:6px">${t.flag}</span>${t.name}</td>
-          <td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td>
-          <td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="pts">0</td>
+          <td class="n">${t.P}</td><td class="n">${t.W}</td><td class="n">${t.D}</td><td class="n">${t.L}</td>
+          <td class="n">${t.GF}</td><td class="n">${t.GA}</td><td class="n">${t.GD>=0?'+':''}${t.GD}</td><td class="pts">${t.Pts}</td>
         </tr>`).join('')}
       </tbody>
     </table>
