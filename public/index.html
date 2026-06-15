@@ -882,14 +882,15 @@ function renderPredict() {
       if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
       sections[key].push(m);
     });
-    // Sort date keys chronologically (ISO date strings sort lexicographically)
-    sectionOrder.sort((a, b) => {
-      const da = new Date(a), db = new Date(b);
-      if (!isNaN(da) && !isNaN(db)) return da - db;
-      if (!isNaN(da)) return -1;
-      if (!isNaN(db)) return 1;
-      return 0; // both non-dates (stage names) — keep order
-    });
+    // Parse "11 Jun" style dates into a sortable number
+    const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    function parseDateKey(s) {
+      const [d, m] = s.split(' ');
+      const mon = MONTHS[m];
+      if (mon === undefined) return Infinity; // non-date keys (stage names) go last
+      return new Date(2026, mon, parseInt(d)).getTime();
+    }
+    sectionOrder.sort((a, b) => parseDateKey(a) - parseDateKey(b));
   }
 
   let n = 1;
