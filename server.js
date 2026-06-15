@@ -76,6 +76,7 @@ const KO_IDS = [
 const NAME_MAP = {
   'Czech Republic':                    'Czechia',
   'Bosnia and Herzegovina':            'Bosnia',
+  'Bosnia-Herzegovina':                'Bosnia',
   'Korea Republic':                    'South Korea',
   "Côte d'Ivoire":                     'Ivory Coast',
   'Congo DR':                          'DR Congo',
@@ -167,8 +168,12 @@ async function fetchScores() {
     for (const match of (data.matches || [])) {
       const home = norm(match.homeTeam?.name || '');
       const away = norm(match.awayTeam?.name || '');
-      const id   = FIXTURE_LOOKUP[`${home}|${away}`];
-      if (!id) continue;
+      // Try both home|away and away|home since API home/away can differ from our fixture list
+      const id = FIXTURE_LOOKUP[`${home}|${away}`] || FIXTURE_LOOKUP[`${away}|${home}`];
+      if (!id) {
+        console.log(`⚠ No fixture match for: ${home} vs ${away}`);
+        continue;
+      }
 
       const ft  = match.score?.fullTime;
       const ht  = match.score?.halfTime;
