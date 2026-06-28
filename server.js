@@ -118,6 +118,7 @@ let state = {
   predictions: {},   // { playerName: { matchId: { h, a } } }
   results:     {},   // { matchId: { h, a } }   — final scores only
   live:        {},   // { matchId: { h, a, status } } — in-play, not counted
+  koTeams:     {},   // { matchId: { home, away } } — admin-set team names for KO matches
   sweepstake:  {
     drawn:       false,
     assignments: {},   // { playerName: [team, team, team] }
@@ -132,6 +133,7 @@ function loadState() {
       const loaded = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
       state = { ...state, ...loaded };
     }
+    state.koTeams = state.koTeams || {};
   } catch (e) {
     console.error('Could not load state:', e.message);
   }
@@ -332,6 +334,16 @@ io.on('connection', socket => {
     io.emit('state_update', state);
   });
 
+  socket.on('set_ko_teams', ({ requester, matchId, home, away }) => {
+    if (!isAdmin(requester)) return;
+    if (!matchId || typeof home !== 'string' || typeof away !== 'string') return;
+    if (!state.koTeams) state.koTeams = {};
+    state.koTeams[matchId] = { home: home.trim(), away: away.trim() };
+    persistState();
+    io.emit('state_update', state);
+    console.log(`KO teams set: ${matchId} = ${home} vs ${away}`);
+  });
+
   socket.on('disconnect', () => {
     console.log(`- client ${socket.id}`);
   });
@@ -353,10 +365,11 @@ loadState();
 
 // Set RESET_STATE=true on Railway to wipe players/predictions/sweepstake on next deploy
 if (process.env.RESET_STATE === 'true') {
-  console.log('⚠️  RESET_STATE=true — clearing all players, predictions and sweepstake');
+  console.log('⚠️  RESET_STATE=true — clearing players, predictions and sweepstake (results and koTeams preserved)');
   state.players     = [];
   state.predictions = {};
   state.sweepstake  = { drawn: false, assignments: {}, eliminated: [] };
+  state.koTeams     = state.koTeams || {};
   persistState();
 }
 

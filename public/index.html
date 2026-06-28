@@ -602,12 +602,50 @@ const GROUPS = {
 };
 
 const KO_STAGES = [
-  {name:'Round of 32',no:'Nº 08',dates:'4–8 July 2026',matches:Array.from({length:16},(_,i)=>({id:`R32-M${i+1}`,home:'TBD',away:'TBD',date:`${4+Math.floor(i/4)} Jul`,venue:['New York','Los Angeles','Dallas','Miami','Atlanta','Seattle','Boston','Philadelphia','Kansas City','Houston','San Francisco','Toronto','Vancouver','Mexico City','Guadalajara','Monterrey'][i]}))},
-  {name:'Round of 16',no:'Nº 09',dates:'9–12 July 2026',matches:Array.from({length:8},(_,i)=>({id:`R16-M${i+1}`,home:'TBD',away:'TBD',date:`${9+Math.floor(i/2)} Jul`,venue:['New York','Los Angeles','Dallas','Miami','Atlanta','Seattle','Boston','Philadelphia'][i]}))},
-  {name:'Quarter-finals',no:'Nº 10',dates:'13–14 July 2026',matches:[{id:'QF1',home:'TBD',away:'TBD',date:'13 Jul',venue:'Los Angeles'},{id:'QF2',home:'TBD',away:'TBD',date:'13 Jul',venue:'Dallas'},{id:'QF3',home:'TBD',away:'TBD',date:'14 Jul',venue:'New York'},{id:'QF4',home:'TBD',away:'TBD',date:'14 Jul',venue:'Miami'}]},
-  {name:'Semi-finals',no:'Nº 11',dates:'14–15 July 2026',matches:[{id:'SF1',home:'TBD',away:'TBD',date:'14 Jul',venue:'Dallas'},{id:'SF2',home:'TBD',away:'TBD',date:'15 Jul',venue:'Atlanta'}]},
-  {name:'Third-place play-off',no:'Nº 12',dates:'18 July 2026',matches:[{id:'3PO',home:'TBD',away:'TBD',date:'18 Jul',venue:'Miami · Hard Rock Stadium'}]},
-  {name:'The Final',no:'Nº 13',dates:'19 July 2026',matches:[{id:'FINAL',home:'TBD',away:'TBD',date:'19 Jul',venue:'MetLife Stadium · New Jersey'}]},
+  {name:'Round of 32', no:'Nº 08', dates:'1–4 Jul 2026', matches:[
+    {id:'R32-M1',  home:'TBD',away:'TBD', date:'1 Jul',  time:'19:00', venue:'New York'},
+    {id:'R32-M2',  home:'TBD',away:'TBD', date:'1 Jul',  time:'19:00', venue:'Los Angeles'},
+    {id:'R32-M3',  home:'TBD',away:'TBD', date:'1 Jul',  time:'22:00', venue:'Dallas'},
+    {id:'R32-M4',  home:'TBD',away:'TBD', date:'1 Jul',  time:'22:00', venue:'Miami'},
+    {id:'R32-M5',  home:'TBD',away:'TBD', date:'2 Jul',  time:'19:00', venue:'Seattle'},
+    {id:'R32-M6',  home:'TBD',away:'TBD', date:'2 Jul',  time:'19:00', venue:'Boston'},
+    {id:'R32-M7',  home:'TBD',away:'TBD', date:'2 Jul',  time:'22:00', venue:'Philadelphia'},
+    {id:'R32-M8',  home:'TBD',away:'TBD', date:'2 Jul',  time:'22:00', venue:'Kansas City'},
+    {id:'R32-M9',  home:'TBD',away:'TBD', date:'3 Jul',  time:'19:00', venue:'Houston'},
+    {id:'R32-M10', home:'TBD',away:'TBD', date:'3 Jul',  time:'19:00', venue:'San Francisco'},
+    {id:'R32-M11', home:'TBD',away:'TBD', date:'3 Jul',  time:'22:00', venue:'Toronto'},
+    {id:'R32-M12', home:'TBD',away:'TBD', date:'3 Jul',  time:'22:00', venue:'Vancouver'},
+    {id:'R32-M13', home:'TBD',away:'TBD', date:'4 Jul',  time:'19:00', venue:'Mexico City'},
+    {id:'R32-M14', home:'TBD',away:'TBD', date:'4 Jul',  time:'19:00', venue:'Guadalajara'},
+    {id:'R32-M15', home:'TBD',away:'TBD', date:'4 Jul',  time:'22:00', venue:'Monterrey'},
+    {id:'R32-M16', home:'TBD',away:'TBD', date:'4 Jul',  time:'22:00', venue:'Atlanta'},
+  ]},
+  {name:'Round of 16', no:'Nº 09', dates:'8–9 Jul 2026', matches:[
+    {id:'R16-M1', home:'TBD',away:'TBD', date:'8 Jul', time:'19:00', venue:'New York'},
+    {id:'R16-M2', home:'TBD',away:'TBD', date:'8 Jul', time:'19:00', venue:'Los Angeles'},
+    {id:'R16-M3', home:'TBD',away:'TBD', date:'8 Jul', time:'22:00', venue:'Dallas'},
+    {id:'R16-M4', home:'TBD',away:'TBD', date:'8 Jul', time:'22:00', venue:'Miami'},
+    {id:'R16-M5', home:'TBD',away:'TBD', date:'9 Jul', time:'19:00', venue:'Seattle'},
+    {id:'R16-M6', home:'TBD',away:'TBD', date:'9 Jul', time:'19:00', venue:'Boston'},
+    {id:'R16-M7', home:'TBD',away:'TBD', date:'9 Jul', time:'22:00', venue:'Philadelphia'},
+    {id:'R16-M8', home:'TBD',away:'TBD', date:'9 Jul', time:'22:00', venue:'Kansas City'},
+  ]},
+  {name:'Quarter-finals', no:'Nº 10', dates:'11–12 Jul 2026', matches:[
+    {id:'QF1', home:'TBD',away:'TBD', date:'11 Jul', time:'19:00', venue:'New York'},
+    {id:'QF2', home:'TBD',away:'TBD', date:'11 Jul', time:'22:00', venue:'Los Angeles'},
+    {id:'QF3', home:'TBD',away:'TBD', date:'12 Jul', time:'19:00', venue:'Dallas'},
+    {id:'QF4', home:'TBD',away:'TBD', date:'12 Jul', time:'22:00', venue:'Miami'},
+  ]},
+  {name:'Semi-finals', no:'Nº 11', dates:'14–15 Jul 2026', matches:[
+    {id:'SF1', home:'TBD',away:'TBD', date:'14 Jul', time:'20:00', venue:'MetLife Stadium, New York'},
+    {id:'SF2', home:'TBD',away:'TBD', date:'15 Jul', time:'20:00', venue:'SoFi Stadium, Los Angeles'},
+  ]},
+  {name:'Third-place play-off', no:'Nº 12', dates:'18 Jul 2026', matches:[
+    {id:'3PO', home:'TBD',away:'TBD', date:'18 Jul', time:'20:00', venue:'Hard Rock Stadium, Miami'},
+  ]},
+  {name:'The Final', no:'Nº 13', dates:'19 Jul 2026', matches:[
+    {id:'FINAL', home:'TBD',away:'TBD', date:'19 Jul', time:'20:00', venue:'MetLife Stadium · New Jersey'},
+  ]},
 ];
 
 const ALL_MATCHES = [];
@@ -619,13 +657,18 @@ Object.entries(GROUPS).forEach(([g,data]) => {
   });
 });
 KO_STAGES.forEach(s => s.matches.forEach(m => {
-  ALL_MATCHES.push({id:m.id,group:null,stage:s.name,md:null,home:m.home,away:m.away,hf:'',af:'',date:m.date,time:'',venue:m.venue});
+  ALL_MATCHES.push({id:m.id,group:null,stage:s.name,md:null,home:m.home,away:m.away,hf:'',af:'',date:m.date,time:m.time||'',venue:m.venue});
 }));
+
+// Get real team name for a KO match (falls back to 'TBD')
+function koName(matchId, side) {
+  return (S.koTeams && S.koTeams[matchId] && S.koTeams[matchId][side]) || 'TBD';
+}
 
 // ═══════════════════════════════════════════════════════════════
 // SERVER STATE  (populated via Socket.io)
 // ═══════════════════════════════════════════════════════════════
-let S = { players:[], predictions:{}, results:{}, live:{} };
+let S = { players:[], predictions:{}, results:{}, live:{}, koTeams:{} };
 // currentPlayer persists across refreshes and tabs via localStorage
 let currentPlayer = localStorage.getItem('wc2026_player') || null;
 
@@ -904,6 +947,12 @@ function renderPredict() {
       const hasPred = pred && pred.h !== undefined && pred.a !== undefined;
       const hasResult = result !== undefined;
       const uk = ukTime(m.time, m.venue);
+      // For KO matches, use server-set team names if available
+      const kt = m.stage !== 'group' ? ((S.koTeams || {})[m.id] || {}) : {};
+      const dispHome = kt.home || m.home;
+      const dispAway = kt.away || m.away;
+      const dispHF = TEAM_FLAGS[kt.home] || m.hf;
+      const dispAF = TEAM_FLAGS[kt.away] || m.af;
 
       let scoreHTML;
       if (hasResult) {
@@ -937,9 +986,9 @@ function renderPredict() {
       html += `
         <div class="pred-fixture${hasResult?' has-result':''}">
           <div class="fix-num">Nº${String(n++).padStart(2,'0')}</div>
-          <div class="fix-home">${m.hf} ${m.home}</div>
+          <div class="fix-home">${dispHF} ${dispHome}</div>
           <div style="text-align:center">${scoreHTML}</div>
-          <div class="fix-away">${m.away} ${m.af}</div>
+          <div class="fix-away">${dispAway} ${dispAF}</div>
           <div class="pts-cell">${ptsHTML}<div class="pts-time">${m.date}${uk?' · <span style="color:var(--accent)">'+uk+'</span>':''}</div><div class="pts-detail">${m.venue}</div></div>
         </div>`;
     });
@@ -1170,6 +1219,7 @@ function saveResult(id) {
 // ═══════════════════════════════════════════════════════════════
 function renderKnockout() {
   const el = document.getElementById('knockoutContent');
+  const admin = isAdmin();
   el.innerHTML = KO_STAGES.map(s => {
     const parts = s.name.split(' ');
     const title = parts.length > 1 ? `${parts.slice(0,-1).join(' ')} <em>${parts[parts.length-1]}</em>` : `<em>${s.name}</em>`;
@@ -1184,21 +1234,80 @@ function renderKnockout() {
           ${s.matches.map(m => {
             const res = S.results[m.id];
             const live = S.live?.[m.id];
+            const kt = (S.koTeams || {})[m.id] || {};
+            const hName = kt.home || 'TBD';
+            const hFlag = TEAM_FLAGS[hName] || '';
+            const aName = kt.away || 'TBD';
+            const aFlag = TEAM_FLAGS[aName] || '';
+            const isTBD = !kt.home;
+            const uk = ukTime(m.time, m.venue);
+
+            // Player predictions for this match
+            const predRows = S.players.map(p => {
+              const pred = (S.predictions[p] || {})[m.id];
+              if (!pred || pred.h === undefined || pred.a === undefined) return null;
+              const pts = calcPts(pred, res);
+              let badge = '';
+              if (pts === 4) badge = '<span style="color:var(--maybe)">⭐</span>';
+              else if (pts === 1) badge = '<span style="color:var(--accent)">✓</span>';
+              else if (pts === 0) badge = '<span style="color:var(--orange)">✗</span>';
+              return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;border-bottom:1px solid var(--border)">
+                <span style="color:var(--muted)">${p}</span>
+                <span>${pred.h}–${pred.a} ${badge}</span>
+              </div>`;
+            }).filter(Boolean);
+
             return `
-              <div class="bm">
-                <div class="bm-num">${m.id}</div>
-                <div class="bm-team${m.home==='TBD'?' tbd':''}"><span>${m.home}</span>${res?`<span class="bm-score">${res.h}</span>`:''}</div>
-                <div class="bm-team${m.away==='TBD'?' tbd':''}"><span>${m.away}</span>${res?`<span class="bm-score">${res.a}</span>`:''}</div>
-                <div class="bm-meta" id="ko_${m.id}">
-                  ${m.date} · ${m.venue}
-                  ${live ? `<br><span style="color:var(--maybe)"><span class="live-dot"></span>${live.h}–${live.a} LIVE</span>` : ''}
-                  ${!res ? `<br><button class="enter-btn" onclick="showKOForm('${m.id}')">+ Result</button>` : `<br><button class="enter-btn" onclick="showKOForm('${m.id}')">Edit</button>`}
+              <div class="bm" id="bm_${m.id}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                  <div class="bm-num">${m.id}</div>
+                  ${admin && isTBD ? `<button onclick="showKOTeamForm('${m.id}')" style="font-size:10px;padding:2px 7px;background:transparent;border:1px solid var(--accent);color:var(--accent);cursor:pointer">Set teams</button>` : ''}
+                  ${admin && !isTBD ? `<button onclick="showKOTeamForm('${m.id}')" style="font-size:10px;padding:2px 7px;background:transparent;border:1px solid var(--border-hi);color:var(--muted);cursor:pointer">Edit</button>` : ''}
                 </div>
+                <div class="bm-team${isTBD?' tbd':''}"><span>${hFlag} ${hName}</span>${res?`<span class="bm-score">${res.h}</span>`:''}</div>
+                <div class="bm-team${isTBD?' tbd':''}"><span>${aFlag} ${aName}</span>${res?`<span class="bm-score">${res.a}</span>`:''}</div>
+                <div class="bm-meta" id="ko_${m.id}">
+                  ${m.date}${uk ? ' · <span style="color:var(--accent)">'+uk+'</span>' : ''} · ${m.venue}
+                  ${live ? `<br><span style="color:var(--maybe)"><span class="live-dot"></span>${live.h}–${live.a} LIVE</span>` : ''}
+                  ${admin && !res ? `<br><button class="enter-btn" onclick="showKOForm('${m.id}')">+ Result</button>` : ''}
+                  ${admin && res ? `<br><button class="enter-btn" onclick="showKOForm('${m.id}')">Edit result</button>` : ''}
+                </div>
+                ${predRows.length > 0 ? `
+                  <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+                    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Picks</div>
+                    ${predRows.join('')}
+                  </div>` : ''}
               </div>`;
           }).join('')}
         </div>
       </div>`;
   }).join('');
+}
+
+function showKOTeamForm(id) {
+  const bm = document.getElementById('bm_' + id);
+  if (!bm) return;
+  const kt = (S.koTeams || {})[id] || {};
+  const meta = document.getElementById('ko_' + id);
+  if (!meta) return;
+  meta.insertAdjacentHTML('beforebegin', `
+    <div id="koTeamForm_${id}" style="margin:8px 0;padding:8px;background:rgba(255,255,255,.05);border:1px solid var(--border-hi);border-radius:4px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Set teams for ${id}</div>
+      <input id="kth_${id}" type="text" placeholder="Home team" value="${kt.home||''}" style="width:100%;margin-bottom:4px;padding:5px 8px;background:var(--card);border:1px solid var(--border-hi);color:var(--text);font-size:13px">
+      <input id="kta_${id}" type="text" placeholder="Away team" value="${kt.away||''}" style="width:100%;margin-bottom:8px;padding:5px 8px;background:var(--card);border:1px solid var(--border-hi);color:var(--text);font-size:13px">
+      <div style="display:flex;gap:6px">
+        <button class="save-btn" onclick="saveKOTeams('${id}')">Save</button>
+        <button class="cancel-btn" onclick="renderKnockout()">✕</button>
+      </div>
+    </div>`);
+  document.getElementById('kth_' + id)?.focus();
+}
+
+function saveKOTeams(id) {
+  const home = document.getElementById('kth_' + id)?.value.trim();
+  const away = document.getElementById('kta_' + id)?.value.trim();
+  if (!home || !away) return;
+  socket.emit('set_ko_teams', { requester: currentPlayer, matchId: id, home, away });
 }
 
 function showKOForm(id) {
